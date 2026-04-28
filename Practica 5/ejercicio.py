@@ -1,8 +1,4 @@
-# ==========================================
-# REGRESIÓN LOGÍSTICA - CÁNCER (NIVEL 20)
-# ==========================================
 
-# Librerías
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,10 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
-# ==========================================
-# 1. CARGA DE DATOS
-# ==========================================
-
+# 1. CARGAR DATOS
 data = load_breast_cancer()
 
 X = pd.DataFrame(data.data, columns=data.feature_names)
@@ -26,10 +19,8 @@ print("Dimensiones del dataset:", X.shape)
 print("\nDistribución de clases:")
 print(y.value_counts())
 
-# ==========================================
-# 2. ANÁLISIS EXPLORATORIO (EDA)
-# ==========================================
 
+# 2. ANÁLISIS EXPLORATORIO
 # Histograma de clases
 plt.figure()
 y.value_counts().plot(kind='bar')
@@ -49,10 +40,7 @@ plt.hist(X['mean texture'])
 plt.title("Distribución - Textura Media")
 plt.show()
 
-# ==========================================
 # 3. PREPROCESAMIENTO
-# ==========================================
-
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
@@ -61,17 +49,12 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# ==========================================
 # 4. MODELO
-# ==========================================
-
 modelo = LogisticRegression(max_iter=5000)
 modelo.fit(X_train, y_train)
 
-# ==========================================
-# 5. EVALUACIÓN
-# ==========================================
 
+# 5. EVALUACIÓN
 y_pred = modelo.predict(X_test)
 
 print("\n===== RESULTADOS =====")
@@ -83,10 +66,8 @@ print(confusion_matrix(y_test, y_pred))
 print("\nReporte de Clasificación:")
 print(classification_report(y_test, y_pred))
 
-# ==========================================
-# 6. MATRIZ DE CONFUSIÓN GRÁFICA
-# ==========================================
 
+# 6. MATRIZ DE CONFUSIÓN GRÁFICA
 cm = confusion_matrix(y_test, y_pred)
 
 plt.figure()
@@ -103,10 +84,7 @@ for i in range(len(cm)):
 
 plt.show()
 
-# ==========================================
 # 7. IMPORTANCIA DE VARIABLES
-# ==========================================
-
 coeficientes = pd.DataFrame(
     modelo.coef_[0],
     index=data.feature_names,
@@ -125,10 +103,7 @@ plt.title("Top 10 Variables Más Influyentes")
 plt.ylabel("Peso")
 plt.show()
 
-# ==========================================
 # 8. PREDICCIÓN DE EJEMPLO
-# ==========================================
-
 ejemplo = X.iloc[0:1]
 ejemplo_scaled = scaler.transform(ejemplo)
 
