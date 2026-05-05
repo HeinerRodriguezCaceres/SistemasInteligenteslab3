@@ -1,0 +1,90 @@
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+
+np.random.seed(42)
+
+num_samples = 100
+
+minutos_mensuales = np.random.randint(100, 600, num_samples)
+mensajes_texto = np.random.randint(10, 200, num_samples)
+uso_datos = np.random.uniform(0.5, 10, num_samples)
+
+facturacion_mensual = minutos_mensuales * 0.1 + mensajes_texto * 0.05 + uso_datos * 5
+
+churn = (facturacion_mensual > 50).astype(int)
+
+data = pd.DataFrame({
+    'Minutos Mensuales': minutos_mensuales,
+    'Mensajes de Texto': mensajes_texto,
+    'Uso de Datos (GB)': uso_datos,
+    'Facturación Mensual': facturacion_mensual,
+    'Churn': churn
+})
+
+
+print("\n--- PRIMERAS FILAS ---")
+print(data.head())
+
+print("\n--- INFORMACIÓN ---")
+print(data.info())
+
+print("\n--- DESCRIPCIÓN ESTADÍSTICA ---")
+print(data.describe())
+
+
+X = data.drop(columns=['Churn'])
+y = data['Churn']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+k_values = range(1, 21)
+accuracies = []
+
+for k in k_values:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train, y_train)
+    y_pred_k = knn.predict(X_test)
+    accuracies.append(accuracy_score(y_test, y_pred_k))
+
+
+plt.figure()
+plt.plot(k_values, accuracies, marker='o')
+plt.xlabel("Número de Vecinos (K)")
+plt.ylabel("Precisión")
+plt.title("Precisión del modelo vs K")
+plt.grid()
+plt.show()
+
+best_k = k_values[np.argmax(accuracies)]
+print("\nMejor K:", best_k)
+
+
+knn_best = KNeighborsClassifier(n_neighbors=best_k)
+knn_best.fit(X_train, y_train)
+
+y_pred = knn_best.predict(X_test)
+
+print("\nPrecisión:", accuracy_score(y_test, y_pred))
+print("\nMatriz de Confusión:\n", confusion_matrix(y_test, y_pred))
+print("\nReporte:\n", classification_report(y_test, y_pred))
+
+
+plt.figure()
+sns.scatterplot(
+    x=data['Uso de Datos (GB)'],
+    y=data['Facturación Mensual'],
+    hue=data['Churn']
+)
+plt.title("Facturación vs Uso de Datos")
+plt.show()

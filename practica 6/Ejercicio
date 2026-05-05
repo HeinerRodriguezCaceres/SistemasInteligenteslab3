@@ -1,0 +1,78 @@
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+
+
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+
+columnas = ["Pregnancies","Glucose","BloodPressure","SkinThickness",
+            "Insulin","BMI","Pedigree","Age","Outcome"]
+
+data = pd.read_csv(url, names=columnas)
+
+print("\n--- HEAD ---")
+print(data.head())
+
+print("\n--- INFO ---")
+print(data.info())
+
+print("\n--- DESCRIBE ---")
+print(data.describe())
+
+
+X = data.drop(columns=["Outcome"])
+y = data["Outcome"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+
+k_values = range(1, 21)
+accuracies = []
+
+for k in k_values:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train, y_train)
+    y_pred = knn.predict(X_test)
+    accuracies.append(accuracy_score(y_test, y_pred))
+
+plt.figure()
+plt.plot(k_values, accuracies, marker='o')
+plt.title("KNN - Precisión vs K")
+plt.show()
+
+best_k = k_values[accuracies.index(max(accuracies))]
+
+knn = KNeighborsClassifier(n_neighbors=best_k)
+knn.fit(X_train, y_train)
+y_pred = knn.predict(X_test)
+
+print("Precisión KNN:", accuracy_score(y_test, y_pred))
+
+
+plt.figure()
+plt.scatter(data["Glucose"], data["BMI"], c=data["Outcome"])
+plt.xlabel("Glucosa")
+plt.ylabel("BMI")
+plt.title("Glucosa vs BMI")
+plt.show()
+
+
+lr = LogisticRegression(max_iter=1000)
+lr.fit(X_train, y_train)
+print("Logistic:", accuracy_score(y_test, lr.predict(X_test)))
+
+dt = DecisionTreeClassifier()
+dt.fit(X_train, y_train)
+print("Tree:", accuracy_score(y_test, dt.predict(X_test)))
